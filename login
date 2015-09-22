@@ -13,10 +13,10 @@ def getInfo():
 	try:
 		with open(path, 'r') as f:
 			print('load user and password from ' + path)
-			name = f.readline()
-			pwd = f.readline()
+			name = f.readline()[0:-1]
+			pwd = f.readline()[0:-1]
 			print('user name:\t' + name[0:-1])
-			print('user pwd:\t' + pwd[0:-1])
+			# print('user pwd:\t' + pwd[0:-1])
 			return (name, pwd)
 	except FileNotFoundError as e:
 		print('config file not found in ' + path)
@@ -42,8 +42,9 @@ def login():
 			])
 			# print(data)
 			with request.urlopen(url, data=data.encode('utf-8')) as f:
-				# stream = f.read()
-				# print(data)
+				stream = f.read()
+				# data = stream.decode('utf-8');
+				# print(stream)
 				print("login success")
 
 login()
