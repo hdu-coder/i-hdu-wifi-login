@@ -14,22 +14,24 @@ path = PurePath(home).joinpath(config).as_posix()
 
 # set default timeout
 timeout = 10
+verbose = False
 
 # handle terminal option
 def parseArgv():
 	try:
-		options,_ =getopt.getopt(sys.argv[1:], 'ht:', ['help', 'timeout='])
+		options,_ =getopt.getopt(sys.argv[1:], 'ht:v', ['help', 'timeout=', 'verbose'])
 		return options
 	except getopt.GetoptError as e:
 		#logging.exception(e)
 		return [('--help')]
 
 def print_help():
-	print('Usage: i-hdu-logon')
+	print('Usage: i-hdu-login')
 	print('')
 	print('Options:')
 	print('\t-h, --help\t\t show help list')
 	print('\t-t, --timeout <timeout>\t set timeout time, default is 10s')
+	print('\t-v, --verbose \t\t show verbose meesage, about debug and error')
 
 # get username and password throught .i-hdu file
 def getInfo():
@@ -71,7 +73,8 @@ def login():
 					# print(stream)
 					print("login success")
 	except BaseException as e:
-		logging.exception(e)
+		if (verbose) :
+			logging.exception(e)
 		print('an error occur, please try again')
 		exit(1)
 
@@ -82,5 +85,7 @@ for key,value in options:
 		exit(0)
 	elif key in ('-t', '--timeout'):
 		timeout = Int(value)
+	elif key in ('-v', '--verbose'):
+		verbose = True
 
 login()

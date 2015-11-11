@@ -25,5 +25,14 @@ restart your bash
 
 	$ i-hdu-logon
 
+# CLI
+```
+Usage: i-hdu-login
+
+Options:
+	-h, --help					show help list
+	-t, --timeout <timeout>		set timeout time, default is 10s
+	-v, --verbose				show verbose meesage, about debug and error
+```
 
 # Thanks
