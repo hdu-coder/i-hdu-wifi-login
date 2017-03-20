@@ -19,7 +19,10 @@ the second line is your password
 
 # Save into PATH
 
+	# zsh/bash
 	$ ln -s `pwd`/login /usr/local/bin/i-hdu-login
+	# fish
+	$ ln -s (pwd)/login /usr/local/bin/i-hdu-login
 
 restart your bash
 
