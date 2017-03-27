@@ -2,15 +2,14 @@
 
 from urllib import request, parse
 from pathlib import PurePath
-import re
-import os
-import logging
-import sys
-import getopt
+import re, os, logging, sys, getopt, json
 
 home = os.environ['HOME']
 config = '.i-hdu'
 path = PurePath(home).joinpath(config).as_posix()
+apiPath = 'http://2.2.2.2/ac_portal/login.php'
+logout = False
+version = 'v1.1.0'
 
 # set default timeout
 timeout = 10
@@ -19,21 +18,23 @@ verbose = False
 # handle terminal option
 def parseArgv():
 	try:
-		options,_ =getopt.getopt(sys.argv[1:], 'ht:v', ['help', 'timeout=', 'verbose'])
+		options,_ =getopt.getopt(sys.argv[1:], 'ht:vl', ['help', 'timeout=', 'verbose', 'logout'])
 		return options
 	except getopt.GetoptError as e:
-		#logging.exception(e)
-		return [('--help')]
+		print('Your option is not allowed here, please use follow options')
+		print('')
+		return [('--help', '')]
 
 def print_help():
 	print('Usage: i-hdu-login')
+	print('Version: %s' % version)
 	print('')
 	print('Options:')
 	print('\t-h, --help\t\t show help list')
 	print('\t-t, --timeout <timeout>\t set timeout time, default is 10s')
 	print('\t-v, --verbose \t\t show verbose meesage, about debug and error')
 
-# get username and password throught .i-hdu file
+# get username and password from $HOME/.i-hdu file
 def getInfo():
 	try:
 		with open(path, 'r') as f:
@@ -50,28 +51,33 @@ def getInfo():
 def login():
 	name, pwd = getInfo()
 	try:
-		with request.urlopen('http://www.baidu.com', timeout=timeout) as f:
-			stream = f.read()
-			data = stream.decode('utf-8')
-			# print(data)
-			result = re.search(r"location\.href=\"(.*)\"",data)
-			if not result:
-				print("you have been login")
-				# return
+		loginData = parse.urlencode([
+			('opr', 'pwdLogin'),
+			('userName', name),
+			('pwd', pwd),
+			('rememberPwd', 0)
+		]).encode('utf-8')
+
+		logoutData = parse.urlencode([
+			('opr', 'logout')
+		]).encode('utf-8')
+
+		if logout: 
+			data = logoutData
+			action = 'Logout'
+		else:
+			data = loginData
+			action = 'Login'
+
+		with request.urlopen(apiPath, data=data, timeout=timeout) as f:
+			res = json.loads(f.read().decode('utf-8').replace('\'', '\"'))
+			verbose and print(res)
+
+			if (res['success']):
+				print('%s Success!' % action)
 			else:
-				url = parse.urljoin(result.group(1),'logon.cgi')
-				# print(url)
-				data = parse.urlencode([
-					('PtUser', name),
-					('PtPwd', pwd),
-					('PtButton', 'logon')
-				])
-				# print(data)
-				with request.urlopen(url, data=data.encode('utf-8'), timeout=timeout) as f:
-					stream = f.read()
-					# data = stream.decode('utf-8');
-					# print(stream)
-					print("login success")
+				print('%s Fail: %s' % (action, res['msg']))
+
 	except BaseException as e:
 		if (verbose) :
 			logging.exception(e)
@@ -79,6 +85,7 @@ def login():
 		exit(1)
 
 options = parseArgv()
+
 for key,value in options:
 	if key in ('-h', '--help'):
 		print_help()
@@ -87,5 +94,7 @@ for key,value in options:
 		timeout = Int(value)
 	elif key in ('-v', '--verbose'):
 		verbose = True
+	elif key in ('-l', '--logout'):
+		logout = True
 
 login()
