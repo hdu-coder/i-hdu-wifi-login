@@ -33,6 +33,7 @@ def print_help():
 	print('\t-h, --help\t\t show help list')
 	print('\t-t, --timeout <timeout>\t set timeout time, default is 10s')
 	print('\t-v, --verbose \t\t show verbose meesage, about debug and error')
+	print('\t-l, --logout \t\t logout from i-hdu wifi')
 
 # get username and password from $HOME/.i-hdu file
 def getInfo():
